@@ -57,3 +57,44 @@ infrastructure/
 | `tenantId` | 하드코딩 | `param tenantId` 참조 |
 | `objectId` | 하드코딩 | `param keyVaultObjectId` 참조 |
 | `subscriptionId` | 하드코딩 (6곳) | `param subscriptionId` 참조 |
+
+**main.bicep 추가
+
+본 프로젝트의 main.bicep은 단순한 리소스 나열이 아닌, 모듈화(Modularity)와 재사용성(Reusability)을 고려하여 설계되었습니다.
+
+1. 모듈 아키텍처
+main.bicep은 루트 진입점으로서 각 서비스 단위를 모듈로 호출합니다.
+
+iot.bicep: IoT Hub 및 장치 연결 설정
+
+analytics.bicep: Stream Analytics 및 저장소 연동
+
+storage.bicep: 결과 데이터 저장을 위한 SQL 및 Data Lake
+
+ai.bicep: OpenAI 서비스 및 보안 키 설정
+
+Why? 리소스 간 의존성을 모듈별로 명확히 분리하여, 특정 리소스 수정 시 전체 환경에 미치는 영향을 최소화했습니다.
+
+2. 관리 철학: "Infrastructure as Code, Not just as Script"
+우리는 다음과 같은 원칙으로 인프라 코드를 관리합니다:
+
+Idempotency (멱등성): 동일한 코드를 여러 번 배포해도 결과는 항상 동일하게 유지됩니다.
+
+Declarative (선언적 정의): "어떻게(How)"가 아닌 "무엇을(What)" 상태로 만들지 정의하여, 실제 환경과 코드 간의 간극을 없앴습니다.
+
+Security by Design:
+
+리소스 생성 시 Key Vault를 통해 민감한 정보를 관리합니다.
+
+하드코딩된 ID(Tenant, Subscription)를 일체 제거하고 param으로 추상화했습니다.
+
+3. 유지보수 가이드 (How to extend)
+새로운 리소스를 추가할 때 다음 절차를 따르세요:
+
+신규 모듈 생성: infrastructure/modules/ 하위에 새로운 .bicep 파일 생성.
+
+main.bicep 호출: 루트 main.bicep 파일 내에서 모듈을 호출(Module call)하여 연결.
+
+파라미터 업데이트: parameters.json에 신규 리소스에 필요한 설정값 추가.
+
+Dry-run 검증: az deployment group what-if 명령어로 변경 영향도 반드시 확인.
