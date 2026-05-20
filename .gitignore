@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Python
+__pycache__/
+*.py[cod]
+*.env
+.env
+local.settings.json
+
+# VS Code
+.vscode/
+
+# Azure Functions
+.python_packages/
+
+# 가상환경
+.venv/
+
+# Azurite 로컬 에뮬레이터
+__azurite_db_*.json
+__blobstorage__/
