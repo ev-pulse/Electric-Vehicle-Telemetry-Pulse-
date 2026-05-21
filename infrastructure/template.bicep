@@ -852,355 +852,82 @@ resource workspaces_ev_modeling_ML_name_workspaceworkingdirectory 'Microsoft.Mac
   }
 }
 
-)_General|AlphabeticallySortedComputers'
-  properties: {
-    category: 'General Exploration'
-    displayName: 'All Computers with their most recent data'
-    version: 2
-    query: 'search not(ObjectName == "Advisor Metrics" or ObjectName == "ManagedSpace") | summarize AggregatedValue = max(TimeGenerated) by Computer | limit 500000 | sort by Computer asc\r\n// Oql: NOT(ObjectName="Advisor Metrics" OR ObjectName=ManagedSpace) | measure max(TimeGenerated) by Computer | top 500000 | Sort Computer // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_General|dataPointsPerManagementGroup'
-  properties: {
-    category: 'General Exploration'
-    displayName: 'Which Management Group is generating the most data points?'
-    version: 2
-    query: 'search * | summarize AggregatedValue = count() by ManagementGroupName\r\n// Oql: * | Measure count() by ManagementGroupName // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_General|dataTypeDistribution'
-  properties: {
-    category: 'General Exploration'
-    displayName: 'Distribution of data Types'
-    version: 2
-    query: 'search * | extend Type = $table | summarize AggregatedValue = count() by Type\r\n// Oql: * | Measure count() by Type // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_General|StaleComputers'
-  properties: {
-    category: 'General Exploration'
-    displayName: 'Stale Computers (data older than 24 hours)'
-    version: 2
-    query: 'search not(ObjectName == "Advisor Metrics" or ObjectName == "ManagedSpace") | summarize lastdata = max(TimeGenerated) by Computer | limit 500000 | where lastdata < ago(24h)\r\n// Oql: NOT(ObjectName="Advisor Metrics" OR ObjectName=ManagedSpace) | measure max(TimeGenerated) as lastdata by Computer | top 500000 | where lastdata < NOW-24HOURS // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|AllEvents'
-  properties: {
-    category: 'Log Management'
-    displayName: 'All Events'
-    version: 2
-    query: 'Event | sort by TimeGenerated desc\r\n// Oql: Type=Event // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|AllSyslog'
-  properties: {
-    category: 'Log Management'
-    displayName: 'All Syslogs'
-    version: 2
-    query: 'Syslog | sort by TimeGenerated desc\r\n// Oql: Type=Syslog // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|AllSyslogByFacility'
-  properties: {
-    category: 'Log Management'
-    displayName: 'All Syslog Records grouped by Facility'
-    version: 2
-    query: 'Syslog | summarize AggregatedValue = count() by Facility\r\n// Oql: Type=Syslog | Measure count() by Facility // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|AllSyslogByProcessName'
-  properties: {
-    category: 'Log Management'
-    displayName: 'All Syslog Records grouped by ProcessName'
-    version: 2
-    query: 'Syslog | summarize AggregatedValue = count() by ProcessName\r\n// Oql: Type=Syslog | Measure count() by ProcessName // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|AllSyslogsWithErrors'
-  properties: {
-    category: 'Log Management'
-    displayName: 'All Syslog Records with Errors'
-    version: 2
-    query: 'Syslog | where SeverityLevel == "error" | sort by TimeGenerated desc\r\n// Oql: Type=Syslog SeverityLevel=error // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|AverageHTTPRequestTimeByClientIPAddress'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Average HTTP Request time by Client IP Address'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = avg(TimeTaken) by cIP\r\n// Oql: Type=W3CIISLog | Measure Avg(TimeTaken) by cIP // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|AverageHTTPRequestTimeHTTPMethod'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Average HTTP Request time by HTTP Method'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = avg(TimeTaken) by csMethod\r\n// Oql: Type=W3CIISLog | Measure Avg(TimeTaken) by csMethod // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|CountIISLogEntriesClientIPAddress'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Count of IIS Log Entries by Client IP Address'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = count() by cIP\r\n// Oql: Type=W3CIISLog | Measure count() by cIP // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|CountIISLogEntriesHTTPRequestMethod'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Count of IIS Log Entries by HTTP Request Method'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = count() by csMethod\r\n// Oql: Type=W3CIISLog | Measure count() by csMethod // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|CountIISLogEntriesHTTPUserAgent'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Count of IIS Log Entries by HTTP User Agent'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = count() by csUserAgent\r\n// Oql: Type=W3CIISLog | Measure count() by csUserAgent // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|CountOfIISLogEntriesByHostRequestedByClient'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Count of IIS Log Entries by Host requested by client'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = count() by csHost\r\n// Oql: Type=W3CIISLog | Measure count() by csHost // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|CountOfIISLogEntriesByURLForHost'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Count of IIS Log Entries by URL for the host "www.contoso.com" (replace with your own)'
-    version: 2
-    query: 'search csHost == "www.contoso.com" | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = count() by csUriStem\r\n// Oql: Type=W3CIISLog csHost="www.contoso.com" | Measure count() by csUriStem // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|CountOfIISLogEntriesByURLRequestedByClient'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Count of IIS Log Entries by URL requested by client (without query strings)'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = count() by csUriStem\r\n// Oql: Type=W3CIISLog | Measure count() by csUriStem // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|CountOfWarningEvents'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Count of Events with level "Warning" grouped by Event ID'
-    version: 2
-    query: 'Event | where EventLevelName == "warning" | summarize AggregatedValue = count() by EventID\r\n// Oql: Type=Event EventLevelName=warning | Measure count() by EventID // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|DisplayBreakdownRespondCodes'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Shows breakdown of response codes'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = count() by scStatus\r\n// Oql: Type=W3CIISLog | Measure count() by scStatus // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|EventsByEventLog'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Count of Events grouped by Event Log'
-    version: 2
-    query: 'Event | summarize AggregatedValue = count() by EventLog\r\n// Oql: Type=Event | Measure count() by EventLog // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|EventsByEventsID'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Count of Events grouped by Event ID'
-    version: 2
-    query: 'Event | summarize AggregatedValue = count() by EventID\r\n// Oql: Type=Event | Measure count() by EventID // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|EventsByEventSource'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Count of Events grouped by Event Source'
-    version: 2
-    query: 'Event | summarize AggregatedValue = count() by Source\r\n// Oql: Type=Event | Measure count() by Source // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|EventsInOMBetween2000to3000'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Events in the Operations Manager Event Log whose Event ID is in the range between 2000 and 3000'
-    version: 2
-    query: 'Event | where EventLog == "Operations Manager" and EventID >= 2000 and EventID <= 3000 | sort by TimeGenerated desc\r\n// Oql: Type=Event EventLog="Operations Manager" EventID:[2000..3000] // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|EventsWithStartedinEventID'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Count of Events containing the word "started" grouped by EventID'
-    version: 2
-    query: 'search in (Event) "started" | summarize AggregatedValue = count() by EventID\r\n// Oql: Type=Event "started" | Measure count() by EventID // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|FindMaximumTimeTakenForEachPage'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Find the maximum time taken for each page'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = max(TimeTaken) by csUriStem\r\n// Oql: Type=W3CIISLog | Measure Max(TimeTaken) by csUriStem // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|IISLogEntriesForClientIP'
-  properties: {
-    category: 'Log Management'
-    displayName: 'IIS Log Entries for a specific client IP Address (replace with your own)'
-    version: 2
-    query: 'search cIP == "192.168.0.1" | extend Type = $table | where Type == W3CIISLog | sort by TimeGenerated desc | project csUriStem, scBytes, csBytes, TimeTaken, scStatus\r\n// Oql: Type=W3CIISLog cIP="192.168.0.1" | Select csUriStem,scBytes,csBytes,TimeTaken,scStatus // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|ListAllIISLogEntries'
-  properties: {
-    category: 'Log Management'
-    displayName: 'All IIS Log Entries'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | sort by TimeGenerated desc\r\n// Oql: Type=W3CIISLog // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|NoOfConnectionsToOMSDKService'
-  properties: {
-    category: 'Log Management'
-    displayName: 'How many connections to Operations Manager\'s SDK service by day'
-    version: 2
-    query: 'Event | where EventID == 26328 and EventLog == "Operations Manager" | summarize AggregatedValue = count() by bin(TimeGenerated, 1d) | sort by TimeGenerated desc\r\n// Oql: Type=Event EventID=26328 EventLog="Operations Manager" | Measure count() interval 1DAY // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|ServerRestartTime'
-  properties: {
-    category: 'Log Management'
-    displayName: 'When did my servers initiate restart?'
-    version: 2
-    query: 'search in (Event) "shutdown" and EventLog == "System" and Source == "User32" and EventID == 1074 | sort by TimeGenerated desc | project TimeGenerated, Computer\r\n// Oql: shutdown Type=Event EventLog=System Source=User32 EventID=1074 | Select TimeGenerated,Computer // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|Show404PagesList'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Shows which pages people are getting a 404 for'
-    version: 2
-    query: 'search scStatus == 404 | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = count() by csUriStem\r\n// Oql: Type=W3CIISLog scStatus=404 | Measure count() by csUriStem // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|ShowServersThrowingInternalServerError'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Shows servers that are throwing internal server error'
-    version: 2
-    query: 'search scStatus == 500 | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = count() by sComputerName\r\n// Oql: Type=W3CIISLog scStatus=500 | Measure count() by sComputerName // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|TotalBytesReceivedByEachAzureRoleInstance'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Total Bytes received by each Azure Role Instance'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = sum(csBytes) by RoleInstance\r\n// Oql: Type=W3CIISLog | Measure Sum(csBytes) by RoleInstance // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|TotalBytesReceivedByEachIISComputer'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Total Bytes received by each IIS Computer'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = sum(csBytes) by Computer | limit 500000\r\n// Oql: Type=W3CIISLog | Measure Sum(csBytes) by Computer | top 500000 // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|TotalBytesRespondedToClientsByClientIPAddress'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Total Bytes responded back to clients by Client IP Address'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = sum(scBytes) by cIP\r\n// Oql: Type=W3CIISLog | Measure Sum(scBytes) by cIP // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|TotalBytesRespondedToClientsByEachIISServerIPAddress'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Total Bytes responded back to clients by each IIS ServerIP Address'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = sum(scBytes) by sIP\r\n// Oql: Type=W3CIISLog | Measure Sum(scBytes) by sIP // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|TotalBytesSentByClientIPAddress'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Total Bytes sent by Client IP Address'
-    version: 2
-    query: 'search * | extend Type = $table | where Type == W3CIISLog | summarize AggregatedValue = sum(csBytes) by cIP\r\n// Oql: Type=W3CIISLog | Measure Sum(csBytes) by cIP // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PEF: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|WarningEvents'
-  properties: {
-    category: 'Log Management'
-    displayName: 'All Events with level "Warning"'
-    version: 2
-    query: 'Event | where EventLevelName == "warning" | sort by TimeGenerated desc\r\n// Oql: Type=Event EventLevelName=warning // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|WindowsFireawallPolicySettingsChanged'
-  properties: {
-    category: 'Log Management'
-    displayName: 'Windows Firewall Policy settings have changed'
-    version: 2
-    query: 'Event | where EventLog == "Microsoft-Windows-Windows Firewall With Advanced Security/Firewall" and EventID == 2008 | sort by TimeGenerated desc\r\n// Oql: Type=Event EventLog="Microsoft-Windows-Windows Firewall With Advanced Security/Firewall" EventID=2008 // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
-)_LogManagement|WindowsFireawallPolicySettingsChangedByMachines'
-  properties: {
-    category: 'Log Management'
-    displayName: 'On which machines and how many times have Windows Firewall Policy settings changed'
-    version: 2
-    query: 'Event | where EventLog == "Microsoft-Windows-Windows Firewall With Advanced Security/Firewall" and EventID == 2008 | summarize AggregatedValue = count() by Computer | limit 500000\r\n// Oql: Type=Event EventLog="Microsoft-Windows-Windows Firewall With Advanced Security/Firewall" EventID=2008 | measure count() by Computer | top 500000 // Args: {OQ: True; WorkspaceId: 00000000-0000-0000-0000-000000000000} // Settings: {PTT: True; SortI: True; SortF: True} // Version: 0.1.122'
-  }
 }
 
 resource servers_sqlserver_4dt_team1_name_Default 'Microsoft.Sql/servers/advancedThreatProtectionSettings@2025-02-01-preview' = {
