@@ -40,20 +40,20 @@ param IotHubs_evpulse_iothub_connectionString string
 @secure()
 param IotHubs_evpulse_iothub_containerName string
 
-@secure()
-param datastores_workspaceartifactstore_secretsType string
+param datastores_workspaceartifactstore_secretsType string = 'AccountKey'
 
-@secure()
-param datastores_workspaceblobstore_secretsType string
+param datastores_workspaceblobstore_secretsType string = 'AccountKey'
 
-@secure()
-param datastores_workspacefilestore_secretsType string
+param datastores_workspacefilestore_secretsType string = 'AccountKey'
 
-@secure()
-param datastores_workspaceworkingdirectory_secretsType string
+param datastores_workspaceworkingdirectory_secretsType string = 'AccountKey'
 
 @secure()
 param vulnerabilityAssessments_Default_storageContainerPath string
+
+@description('SQL Server Administrator Password')
+@secure()
+param sqlAdminPassword string
 param connections_sql_name string = 'sql'
 param connections_teams_name string = 'teams'
 param sites_ev_pulse_chat_name string = 'ev-pulse-chat'
@@ -235,6 +235,7 @@ resource servers_sqlserver_4dt_team1_name_resource 'Microsoft.Sql/servers@2025-0
   kind: 'v12.0'
   properties: {
     administratorLogin: 'sqluser'
+    administratorLoginPassword: sqlAdminPassword
     version: '12.0'
     minimalTlsVersion: '1.2'
     publicNetworkAccess: 'Enabled'
