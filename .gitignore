@@ -4,3 +4,6 @@ parameters.local.json
 infrastructure/parameters_local.json
 infrastructure/parameters.local.json
 *.local.json
+
+echo ".DS_Store" >> .gitignore
+echo "**/.DS_Store" >> .gitignore
