@@ -50,7 +50,6 @@ param vaults_evmodelingml9323514119_name string = 'evmodelingml9323514119'
 param storageAccounts_4dtteam1storage_name string = '4dtteam1storage'
 param accounts_evpulse_azoai_name string = 'evpulse-azoai'
 param components_evmodelingml8998220664_name string = 'evmodelingml8998220664'
-param streamingjobs_evpulse_sa_job_name string = 'evpulse-sa-job'
 param storageAccounts_evmodelingml3270747925_name string = 'evmodelingml3270747925'
 param workspaces_ev_modeling_ML_name string = 'ev-modeling-ML'
 param workspaces_evmodelingml1303723571_name string = 'evmodelingml1303723571'
@@ -346,34 +345,6 @@ resource storageAccounts_evmodelingml3270747925_name_resource 'Microsoft.Storage
   }
 }
 
-resource streamingjobs_evpulse_sa_job_name_resource 'Microsoft.StreamAnalytics/streamingjobs@2021-10-01-preview' = {
-  name: streamingjobs_evpulse_sa_job_name
-  location: 'Korea Central'
-  tags: {
-    'hidden-link:/Microsoft.StreamAnalytics/streamingjobs/settings': '{"createdFrom":"Portal"}'
-  }
-  sku: {
-    name: 'StandardV2'
-    capacity: 10
-  }
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    sku: {
-      name: 'StandardV2'
-    }
-    outputStartMode: 'JobStartTime'
-    eventsOutOfOrderPolicy: 'Adjust'
-    outputErrorPolicy: 'Stop'
-    eventsOutOfOrderMaxDelayInSeconds: 0
-    eventsLateArrivalMaxDelayInSeconds: 5
-    dataLocale: 'en-US'
-    compatibilityLevel: '1.2'
-    contentStoragePolicy: 'SystemAccount'
-    jobType: 'Cloud'
-  }
-}
 
 resource connections_sql_name_resource 'Microsoft.Web/connections@2016-06-01' = {
   name: connections_sql_name
@@ -997,51 +968,6 @@ resource Microsoft_Storage_storageAccounts_tableServices_storageAccounts_evmodel
   }
 }
 
-resource streamingjobs_evpulse_sa_job_name_iothub_input 'Microsoft.StreamAnalytics/streamingjobs/inputs@2021-10-01-preview' = {
-  parent: streamingjobs_evpulse_sa_job_name_resource
-  name: 'iothub-input'
-  properties: {
-    type: 'Stream'
-    datasource: {
-      type: 'Microsoft.Devices/IotHubs'
-      properties: {
-        iotHubNamespace: 'evpulse-iothub'
-        sharedAccessPolicyName: 'iothubowner'
-        endpoint: 'messages/events'
-        consumerGroupName: '$Default'
-      }
-    }
-    compression: {
-      type: 'None'
-    }
-    serialization: {
-      type: 'Json'
-      properties: {
-        encoding: 'UTF8'
-      }
-    }
-  }
-}
-
-resource streamingjobs_evpulse_sa_job_name_sql_telemetry_output 'Microsoft.StreamAnalytics/streamingjobs/outputs@2021-10-01-preview' = {
-  parent: streamingjobs_evpulse_sa_job_name_resource
-  name: 'sql-telemetry-output'
-  properties: {
-    datasource: {
-      type: 'Microsoft.Sql/Server/Database'
-      properties: {
-        maxWriterCount: 1
-        maxBatchCount: 10000
-        table: 'dbo.telemetry'
-        server: 'sqlserver-4dt-team1'
-        database: '4dt_team1_DB'
-        user: 'sqluser'
-        authenticationMode: 'ConnectionString'
-      }
-    }
-  }
-}
-
 resource sites_ev_pulse_chat_name_ftp 'Microsoft.Web/sites/basicPublishingCredentialsPolicies@2024-11-01' = {
   parent: sites_ev_pulse_chat_name_resource
   name: 'ftp'
@@ -1364,17 +1290,6 @@ resource Microsoft_Sql_servers_databases_securityAlertPolicies_servers_sqlserver
     ]
     emailAccountAdmins: false
     retentionDays: 0
-  }
-  dependsOn: [
-    servers_sqlserver_4dt_team1_name_resource
-  ]
-}
-
-resource Microsoft_Sql_servers_databases_transparentDataEncryption_servers_sqlserver_4dt_team1_name_4dt_team1_DB_Current 'Microsoft.Sql/servers/databases/transparentDataEncryption@2025-02-01-preview' = {
-  parent: servers_sqlserver_4dt_team1_name_4dt_team1_DB
-  name: 'Current'
-  properties: {
-    state: 'Enabled'
   }
   dependsOn: [
     servers_sqlserver_4dt_team1_name_resource
