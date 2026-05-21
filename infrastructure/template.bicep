@@ -480,58 +480,6 @@ resource components_evmodelingml8998220664_name_resource 'microsoft.insights/com
   }
 }
 
-resource vaults_evmodelingml9323514119_name_dcb3bab8_6b82_4976_8958_c307ec831b05_1NdXAbdNRNl6WhX_Io_wZcFt_iP6Fa5YdjshZCZu2ec 'Microsoft.KeyVault/vaults/secrets@2026-03-01-preview' = {
-  parent: vaults_evmodelingml9323514119_name_resource
-  name: 'dcb3bab8-6b82-4976-8958-c307ec831b05-1NdXAbdNRNl6WhX-Io-wZcFt-iP6Fa5YdjshZCZu2ec'
-  location: 'koreacentral'
-  properties: {
-    contentType: 'application/vnd.ms-StorageAccountAccessKey'
-    attributes: {
-      enabled: true
-      exp: 1842401512
-    }
-  }
-}
-
-resource vaults_evmodelingml9323514119_name_dcb3bab8_6b82_4976_8958_c307ec831b05_6d0HgeGknSLtxaQGMULWTGlw84w3ZJ9JpeGssTzbf4A 'Microsoft.KeyVault/vaults/secrets@2026-03-01-preview' = {
-  parent: vaults_evmodelingml9323514119_name_resource
-  name: 'dcb3bab8-6b82-4976-8958-c307ec831b05-6d0HgeGknSLtxaQGMULWTGlw84w3ZJ9JpeGssTzbf4A'
-  location: 'koreacentral'
-  properties: {
-    contentType: 'application/vnd.ms-StorageAccountAccessKey'
-    attributes: {
-      enabled: true
-      exp: 1842401512
-    }
-  }
-}
-
-resource vaults_evmodelingml9323514119_name_dcb3bab8_6b82_4976_8958_c307ec831b05_K7_w8c_xpXVQFl6HFD_zQMpZxKQr_SvWJRegHAWqhzQ 'Microsoft.KeyVault/vaults/secrets@2026-03-01-preview' = {
-  parent: vaults_evmodelingml9323514119_name_resource
-  name: 'dcb3bab8-6b82-4976-8958-c307ec831b05-K7-w8c-xpXVQFl6HFD-zQMpZxKQr-SvWJRegHAWqhzQ'
-  location: 'koreacentral'
-  properties: {
-    contentType: 'application/vnd.ms-StorageAccountAccessKey'
-    attributes: {
-      enabled: true
-      exp: 1842401512
-    }
-  }
-}
-
-resource vaults_evmodelingml9323514119_name_dcb3bab8_6b82_4976_8958_c307ec831b05_nZK_J6ngnA0KfdtCF4_C8tLONy_31l8wf_EuK7DV2M 'Microsoft.KeyVault/vaults/secrets@2026-03-01-preview' = {
-  parent: vaults_evmodelingml9323514119_name_resource
-  name: 'dcb3bab8-6b82-4976-8958-c307ec831b05--nZK-J6ngnA0KfdtCF4-C8tLONy-31l8wf-EuK7DV2M'
-  location: 'koreacentral'
-  properties: {
-    contentType: 'application/vnd.ms-StorageAccountAccessKey'
-    attributes: {
-      enabled: true
-      exp: 1842401512
-    }
-  }
-}
-
 resource servers_sqlserver_4dt_team1_name_Default 'Microsoft.Sql/servers/advancedThreatProtectionSettings@2025-02-01-preview' = {
   parent: servers_sqlserver_4dt_team1_name_resource
   name: 'Default'
