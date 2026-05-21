@@ -34,22 +34,6 @@ param keyVaultObjectId string
 param subscriptionId string
 
 // ── 기존 파라미터 ────────────────────────────────────────────
-@secure()
-param IotHubs_evpulse_iothub_connectionString string
-
-@secure()
-param IotHubs_evpulse_iothub_containerName string
-
-param datastores_workspaceartifactstore_secretsType string = 'AccountKey'
-
-param datastores_workspaceblobstore_secretsType string = 'AccountKey'
-
-param datastores_workspacefilestore_secretsType string = 'AccountKey'
-
-param datastores_workspaceworkingdirectory_secretsType string = 'AccountKey'
-
-@secure()
-param vulnerabilityAssessments_Default_storageContainerPath string
 
 @description('SQL Server Administrator Password')
 @secure()
@@ -137,13 +121,7 @@ resource IotHubs_evpulse_iothub_name_resource 'Microsoft.Devices/IotHubs@2025-08
         isEnabled: true
       }
     }
-    storageEndpoints: {
-      '$default': {
-        sasTtlAsIso8601: 'PT1H'
-        connectionString: IotHubs_evpulse_iothub_connectionString
-        containerName: IotHubs_evpulse_iothub_containerName
-      }
-    }
+    storageEndpoints: {}
     messagingEndpoints: {
       fileNotifications: {
         lockDurationAsIso8601: 'PT1M'
@@ -386,7 +364,6 @@ resource streamingjobs_evpulse_sa_job_name_resource 'Microsoft.StreamAnalytics/s
       name: 'StandardV2'
     }
     outputStartMode: 'JobStartTime'
-    outputStartTime: '2026-05-19T07:31:45.713Z'
     eventsOutOfOrderPolicy: 'Adjust'
     outputErrorPolicy: 'Stop'
     eventsOutOfOrderMaxDelayInSeconds: 0
@@ -488,28 +465,6 @@ resource serverfarms_ASP_4dtteam1_88e2_name_resource 'Microsoft.Web/serverfarms@
   }
 }
 
-resource smartdetectoralertrules_failure_anomalies_evmodelingml8998220664_name_resource 'microsoft.alertsmanagement/smartdetectoralertrules@2021-04-01' = {
-  name: smartdetectoralertrules_failure_anomalies_evmodelingml8998220664_name
-  location: 'global'
-  properties: {
-    description: 'Failure Anomalies notifies you of an unusual rise in the rate of failed HTTP requests or dependency calls.'
-    state: 'Enabled'
-    severity: 'Sev3'
-    frequency: 'PT1M'
-    detector: {
-      id: 'FailureAnomaliesDetector'
-    }
-    scope: [
-      components_evmodelingml8998220664_name_resource.id
-    ]
-    actionGroups: {
-      groupIds: [
-        actiongroups_application_insights_smart_detection_externalid
-      ]
-    }
-  }
-}
-
 resource accounts_evpulse_azoai_name_Default 'Microsoft.CognitiveServices/accounts/defenderForAISettings@2025-12-01' = {
   parent: accounts_evpulse_azoai_name_resource
   name: 'Default'
@@ -606,129 +561,11 @@ resource vaults_evmodelingml9323514119_name_dcb3bab8_6b82_4976_8958_c307ec831b05
   }
 }
 
-resource workspaces_ev_modeling_ML_name_workspaceartifactstore 'Microsoft.MachineLearningServices/workspaces/datastores@2025-12-01' = {
-  parent: workspaces_ev_modeling_ML_name_resource
-  name: 'workspaceartifactstore'
-  properties: {
-    credentials: {
-      credentialsType: 'AccountKey'
-      secrets: {
-        secretsType: datastores_workspaceartifactstore_secretsType
-      }
-    }
-    datastoreType: 'AzureBlob'
-    accountName: 'evmodelingml3270747925'
-    containerName: 'azureml'
-    endpoint: 'core.windows.net'
-    protocol: 'https'
-    serviceDataAccessAuthIdentity: 'None'
-  }
-}
-
-resource workspaces_ev_modeling_ML_name_workspaceblobstore 'Microsoft.MachineLearningServices/workspaces/datastores@2025-12-01' = {
-  parent: workspaces_ev_modeling_ML_name_resource
-  name: 'workspaceblobstore'
-  properties: {
-    credentials: {
-      credentialsType: 'AccountKey'
-      secrets: {
-        secretsType: datastores_workspaceblobstore_secretsType
-      }
-    }
-    subscriptionId: subscriptionId                     // 파라미터 참조 — 하드코딩 제거
-    resourceGroup: '4dt_team_1'
-    datastoreType: 'AzureBlob'
-    accountName: 'evmodelingml3270747925'
-    containerName: 'azureml-blobstore-dcb3bab8-6b82-4976-8958-c307ec831b05'
-    endpoint: 'core.windows.net'
-    protocol: 'https'
-    serviceDataAccessAuthIdentity: 'WorkspaceSystemAssignedIdentity'
-  }
-}
-
-resource workspaces_ev_modeling_ML_name_workspacefilestore 'Microsoft.MachineLearningServices/workspaces/datastores@2025-12-01' = {
-  parent: workspaces_ev_modeling_ML_name_resource
-  name: 'workspacefilestore'
-  properties: {
-    credentials: {
-      credentialsType: 'AccountKey'
-      secrets: {
-        secretsType: datastores_workspacefilestore_secretsType
-      }
-    }
-    datastoreType: 'AzureFile'
-    accountName: 'evmodelingml3270747925'
-    fileShareName: 'azureml-filestore-dcb3bab8-6b82-4976-8958-c307ec831b05'
-    endpoint: 'core.windows.net'
-    protocol: 'https'
-    serviceDataAccessAuthIdentity: 'None'
-  }
-}
-
-resource workspaces_ev_modeling_ML_name_workspaceworkingdirectory 'Microsoft.MachineLearningServices/workspaces/datastores@2025-12-01' = {
-  parent: workspaces_ev_modeling_ML_name_resource
-  name: 'workspaceworkingdirectory'
-  properties: {
-    credentials: {
-      credentialsType: 'AccountKey'
-      secrets: {
-        secretsType: datastores_workspaceworkingdirectory_secretsType
-      }
-    }
-    datastoreType: 'AzureFile'
-    accountName: 'evmodelingml3270747925'
-    fileShareName: 'code-391ff5ac-6576-460f-ba4d-7e03433c68b6'
-    endpoint: 'core.windows.net'
-    protocol: 'https'
-    serviceDataAccessAuthIdentity: 'None'
-  }
-}
-
 resource servers_sqlserver_4dt_team1_name_Default 'Microsoft.Sql/servers/advancedThreatProtectionSettings@2025-02-01-preview' = {
   parent: servers_sqlserver_4dt_team1_name_resource
   name: 'Default'
   properties: {
     state: 'Disabled'
-  }
-}
-
-resource servers_sqlserver_4dt_team1_name_CreateIndex 'Microsoft.Sql/servers/advisors@2014-04-01' = {
-  parent: servers_sqlserver_4dt_team1_name_resource
-  name: 'CreateIndex'
-  properties: {
-    autoExecuteValue: 'Disabled'
-  }
-}
-
-resource servers_sqlserver_4dt_team1_name_DbParameterization 'Microsoft.Sql/servers/advisors@2014-04-01' = {
-  parent: servers_sqlserver_4dt_team1_name_resource
-  name: 'DbParameterization'
-  properties: {
-    autoExecuteValue: 'Disabled'
-  }
-}
-
-resource servers_sqlserver_4dt_team1_name_DefragmentIndex 'Microsoft.Sql/servers/advisors@2014-04-01' = {
-  parent: servers_sqlserver_4dt_team1_name_resource
-  name: 'DefragmentIndex'
-  properties: {
-    autoExecuteValue: 'Disabled'
-  }
-}
-
-resource servers_sqlserver_4dt_team1_name_DropIndex 'Microsoft.Sql/servers/advisors@2014-04-01' = {
-  parent: servers_sqlserver_4dt_team1_name_resource
-  name: 'DropIndex'
-  properties: {
-    autoExecuteValue: 'Disabled'
-  }
-}
-
-resource servers_sqlserver_4dt_team1_name_ForceLastGoodPlan 'Microsoft.Sql/servers/advisors@2014-04-01' = {
-  parent: servers_sqlserver_4dt_team1_name_resource
-  name: 'ForceLastGoodPlan'
-  properties: {
-    autoExecuteValue: 'Enabled'
   }
 }
 
@@ -847,14 +684,6 @@ resource Microsoft_Sql_servers_databases_geoBackupPolicies_servers_sqlserver_4dt
   ]
 }
 
-resource servers_sqlserver_4dt_team1_name_master_Current 'Microsoft.Sql/servers/databases/ledgerDigestUploads@2025-02-01-preview' = {
-  name: '${servers_sqlserver_4dt_team1_name}/master/Current'
-  properties: {}
-  dependsOn: [
-    servers_sqlserver_4dt_team1_name_resource
-  ]
-}
-
 resource Microsoft_Sql_servers_databases_securityAlertPolicies_servers_sqlserver_4dt_team1_name_master_Default 'Microsoft.Sql/servers/databases/securityAlertPolicies@2025-02-01-preview' = {
   name: '${servers_sqlserver_4dt_team1_name}/master/Default'
   properties: {
@@ -907,17 +736,6 @@ resource Microsoft_Sql_servers_devOpsAuditingSettings_servers_sqlserver_4dt_team
   }
 }
 
-resource servers_sqlserver_4dt_team1_name_current 'Microsoft.Sql/servers/encryptionProtector@2025-02-01-preview' = {
-  parent: servers_sqlserver_4dt_team1_name_resource
-  name: 'current'
-  kind: 'servicemanaged'
-  properties: {
-    serverKeyName: 'ServiceManaged'
-    serverKeyType: 'ServiceManaged'
-    autoRotationEnabled: false
-  }
-}
-
 resource Microsoft_Sql_servers_extendedAuditingSettings_servers_sqlserver_4dt_team1_name_Default 'Microsoft.Sql/servers/extendedAuditingSettings@2025-02-01-preview' = {
   parent: servers_sqlserver_4dt_team1_name_resource
   name: 'default'
@@ -959,15 +777,6 @@ resource servers_sqlserver_4dt_team1_name_QueryEditorClientIPAddress_17791754969
   }
 }
 
-resource servers_sqlserver_4dt_team1_name_ServiceManaged 'Microsoft.Sql/servers/keys@2025-02-01-preview' = {
-  parent: servers_sqlserver_4dt_team1_name_resource
-  name: 'ServiceManaged'
-  kind: 'servicemanaged'
-  properties: {
-    serverKeyType: 'ServiceManaged'
-  }
-}
-
 resource Microsoft_Sql_servers_securityAlertPolicies_servers_sqlserver_4dt_team1_name_Default 'Microsoft.Sql/servers/securityAlertPolicies@2025-02-01-preview' = {
   parent: servers_sqlserver_4dt_team1_name_resource
   name: 'Default'
@@ -992,17 +801,6 @@ resource Microsoft_Sql_servers_sqlVulnerabilityAssessments_servers_sqlserver_4dt
   }
 }
 
-resource Microsoft_Sql_servers_vulnerabilityAssessments_servers_sqlserver_4dt_team1_name_Default 'Microsoft.Sql/servers/vulnerabilityAssessments@2025-02-01-preview' = {
-  parent: servers_sqlserver_4dt_team1_name_resource
-  name: 'Default'
-  properties: {
-    recurringScans: {
-      isEnabled: false
-      emailSubscriptionAdmins: true
-    }
-    storageContainerPath: vulnerabilityAssessments_Default_storageContainerPath
-  }
-}
 
 resource storageAccounts_4dtteam1af8e_name_default 'Microsoft.Storage/storageAccounts/blobServices@2025-08-01' = {
   parent: storageAccounts_4dtteam1af8e_name_resource
@@ -1475,61 +1273,6 @@ resource servers_sqlserver_4dt_team1_name_4dt_team1_DB_Default 'Microsoft.Sql/se
   ]
 }
 
-resource servers_sqlserver_4dt_team1_name_4dt_team1_DB_CreateIndex 'Microsoft.Sql/servers/databases/advisors@2014-04-01' = {
-  parent: servers_sqlserver_4dt_team1_name_4dt_team1_DB
-  name: 'CreateIndex'
-  properties: {
-    autoExecuteValue: 'Disabled'
-  }
-  dependsOn: [
-    servers_sqlserver_4dt_team1_name_resource
-  ]
-}
-
-resource servers_sqlserver_4dt_team1_name_4dt_team1_DB_DbParameterization 'Microsoft.Sql/servers/databases/advisors@2014-04-01' = {
-  parent: servers_sqlserver_4dt_team1_name_4dt_team1_DB
-  name: 'DbParameterization'
-  properties: {
-    autoExecuteValue: 'Disabled'
-  }
-  dependsOn: [
-    servers_sqlserver_4dt_team1_name_resource
-  ]
-}
-
-resource servers_sqlserver_4dt_team1_name_4dt_team1_DB_DefragmentIndex 'Microsoft.Sql/servers/databases/advisors@2014-04-01' = {
-  parent: servers_sqlserver_4dt_team1_name_4dt_team1_DB
-  name: 'DefragmentIndex'
-  properties: {
-    autoExecuteValue: 'Disabled'
-  }
-  dependsOn: [
-    servers_sqlserver_4dt_team1_name_resource
-  ]
-}
-
-resource servers_sqlserver_4dt_team1_name_4dt_team1_DB_DropIndex 'Microsoft.Sql/servers/databases/advisors@2014-04-01' = {
-  parent: servers_sqlserver_4dt_team1_name_4dt_team1_DB
-  name: 'DropIndex'
-  properties: {
-    autoExecuteValue: 'Disabled'
-  }
-  dependsOn: [
-    servers_sqlserver_4dt_team1_name_resource
-  ]
-}
-
-resource servers_sqlserver_4dt_team1_name_4dt_team1_DB_ForceLastGoodPlan 'Microsoft.Sql/servers/databases/advisors@2014-04-01' = {
-  parent: servers_sqlserver_4dt_team1_name_4dt_team1_DB
-  name: 'ForceLastGoodPlan'
-  properties: {
-    autoExecuteValue: 'Enabled'
-  }
-  dependsOn: [
-    servers_sqlserver_4dt_team1_name_resource
-  ]
-}
-
 resource Microsoft_Sql_servers_databases_auditingPolicies_servers_sqlserver_4dt_team1_name_4dt_team1_DB_Default 'Microsoft.Sql/servers/databases/auditingPolicies@2014-04-01' = {
   parent: servers_sqlserver_4dt_team1_name_4dt_team1_DB
   name: 'Default'
@@ -1564,7 +1307,7 @@ resource Microsoft_Sql_servers_databases_backupLongTermRetentionPolicies_servers
     weeklyRetention: 'PT0S'
     monthlyRetention: 'PT0S'
     yearlyRetention: 'PT0S'
-    weekOfYear: 0
+    weekOfYear: 1
   }
   dependsOn: [
     servers_sqlserver_4dt_team1_name_resource
@@ -1603,15 +1346,6 @@ resource Microsoft_Sql_servers_databases_geoBackupPolicies_servers_sqlserver_4dt
   properties: {
     state: 'Disabled'
   }
-  dependsOn: [
-    servers_sqlserver_4dt_team1_name_resource
-  ]
-}
-
-resource servers_sqlserver_4dt_team1_name_4dt_team1_DB_Current 'Microsoft.Sql/servers/databases/ledgerDigestUploads@2025-02-01-preview' = {
-  parent: servers_sqlserver_4dt_team1_name_4dt_team1_DB
-  name: 'Current'
-  properties: {}
   dependsOn: [
     servers_sqlserver_4dt_team1_name_resource
   ]

@@ -41,9 +41,6 @@ jobs:
               tenantId="${{ secrets.TENANT_ID }}" \
               keyVaultObjectId="${{ secrets.KV_OBJECT_ID }}" \
               subscriptionId="${{ secrets.SUBSCRIPTION_ID }}" \
-              IotHubs_evpulse_iothub_connectionString="${{ secrets.IOTHUB_CONNECTION_STRING }}" \
-              IotHubs_evpulse_iothub_containerName="evpulse-container" \
-              vulnerabilityAssessments_Default_storageContainerPath="${{ secrets.STORAGE_CONTAINER_PATH }}" \
               sqlAdminPassword="${{ secrets.SQL_ADMIN_PASSWORD }}"
 
   # ── [Job 2] Production Deployment to Azure Cloud (Main Branch Push only) ──
@@ -70,9 +67,6 @@ jobs:
               tenantId="${{ secrets.TENANT_ID }}" \
               keyVaultObjectId="${{ secrets.KV_OBJECT_ID }}" \
               subscriptionId="${{ secrets.SUBSCRIPTION_ID }}" \
-              IotHubs_evpulse_iothub_connectionString="${{ secrets.IOTHUB_CONNECTION_STRING }}" \
-              IotHubs_evpulse_iothub_containerName="evpulse-container" \
-              vulnerabilityAssessments_Default_storageContainerPath="${{ secrets.STORAGE_CONTAINER_PATH }}" \
               sqlAdminPassword="${{ secrets.SQL_ADMIN_PASSWORD }}" \
             --name "deploy-${{ github.sha }}"
 
