@@ -11,7 +11,6 @@ __pycache__/
 local.settings.json
 
 # VS Code
-.vscode/
 
 # Azure Functions
 .python_packages/
@@ -22,3 +21,4 @@ local.settings.json
 # Azurite 로컬 에뮬레이터
 __azurite_db_*.json
 __blobstorage__/
+__queuestorage__/

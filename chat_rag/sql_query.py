@@ -1,5 +1,8 @@
 import pyodbc
+import logging
 import os
+
+SCHEMA = os.environ["DB_SCHEMA"]
 
 # SQL Server 연결 및 쿼리 실행 관련 함수
 def get_connection():
@@ -28,6 +31,7 @@ def execute_query(sql: str) -> list[dict]:
     try:
         conn = get_connection()
         cursor = conn.cursor()
+        logging.info("실행 SQL: %s", sql)
         cursor.execute(sql)
         columns = [col[0] for col in cursor.description]
         rows = cursor.fetchall()
@@ -35,21 +39,58 @@ def execute_query(sql: str) -> list[dict]:
         conn.close()
         return result
     except Exception as e:
-        raise Exception(f"SQL 실행 오류: {str(e)}")
+        logging.error("SQL 실행 오류: %s\nSQL: %s", e, sql)
+        return []
+
+
+_TABLE_DESCRIPTIONS = {
+    "region_summary":   "지역 정보 관리",
+    "vehicle_info":     "차량 기본 정보",
+    "VehicleModel":     "차량 모델 정보",
+    "vehicle_status":   "차량 현재 상태 (실시간 관제용)",
+    "battery_telemetry":"시간대별 배터리 센서 및 BSI 데이터",
+    "bsi_feature_log":  "BSI 계산 입력 피처 로그",
+    "alert_log":        "실시간 이벤트 및 알림 로그",
+    "BSI_Threshold":    "BSI 상태 기준값 관리",
+}
+
+
+# 인스턴스 재시작 전까지 스키마를 메모리에 캐싱 (매 요청마다 DB 조회 방지)
+_schema_cache: str = ""
 
 
 def get_table_schema() -> str:
-    """
-    GPT에게 테이블 구조 알려주기 위한 스키마 정보
-    컬럼 추가 시 여기만 수정
-    """
-    return """
-    테이블명: dbo.ModelAlertTest
+    global _schema_cache
+    if _schema_cache:
+        return _schema_cache
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = ?
+            ORDER BY TABLE_NAME, ORDINAL_POSITION
+        """, SCHEMA)
+        rows = cursor.fetchall()
+        conn.close()
+    except Exception as e:
+        logging.warning("스키마 동적 로딩 실패: %s", e)
+        return ""
 
-    컬럼 정보:
-    - alertId (int): 고유 식별자
-    - bsiValue (decimal): 이상 감지 수치값
-    - triggeredFeature (varchar): 이상을 유발한 특징
-    - timestamp (datetime2): 발생 시간
-    - alertStatus (nvarchar): 상태값 ('정상', '이상', '위험')
-    """
+    tables: dict = {}
+    for table_name, column_name, data_type in rows:
+        tables.setdefault(table_name, []).append((column_name, data_type))
+
+    result = []
+    for table_name, columns in tables.items():
+        desc = _TABLE_DESCRIPTIONS.get(table_name, "")
+        header = f"[{SCHEMA}.{table_name}]" + (f" -- {desc}" if desc else "")
+        result.append(header)
+        for column_name, data_type in columns:
+            result.append(f"- {column_name} ({data_type})")
+        result.append("")
+
+    # 첫 요청에만 DB 조회 후 _schema_cache에 저장, 이후 요청은 캐시에서 바로 반환
+    _schema_cache = "\n    ".join(result)
+    return _schema_cache
