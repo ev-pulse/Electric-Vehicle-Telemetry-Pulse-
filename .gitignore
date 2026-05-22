@@ -12,3 +12,10 @@ echo "**/.DS_Store" >> .gitignore
 .env
 __pycache__/
 *.pyc
+*.csv
+*.jsonl
+.DS_Store
+.env
+__pycache__/
+*.pyc
+__azurite_db_*.json
