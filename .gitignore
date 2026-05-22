@@ -7,3 +7,8 @@ infrastructure/parameters.local.json
 
 echo ".DS_Store" >> .gitignore
 echo "**/.DS_Store" >> .gitignore
+
+.DS_Store
+.env
+__pycache__/
+*.pyc
