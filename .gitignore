@@ -1,0 +1,21 @@
+parameters.local.json
+
+# Prevent committing local parameters with sensitive data
+infrastructure/parameters_local.json
+infrastructure/parameters.local.json
+*.local.json
+
+echo ".DS_Store" >> .gitignore
+echo "**/.DS_Store" >> .gitignore
+
+.DS_Store
+.env
+__pycache__/
+*.pyc
+*.csv
+*.jsonl
+.DS_Store
+.env
+__pycache__/
+*.pyc
+__azurite_db_*.json
