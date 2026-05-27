@@ -28,7 +28,11 @@ def convert_to_sql(user_question: str, schema: str) -> str:
     - 모든 테이블명은 {SCHEMA}.테이블명 형식 사용
     - 테이블 JOIN은 같은 이름의 컬럼이 있을 때만 수행 (예: vehicle_id)
     - 한 테이블에 필요한 모든 컬럼이 있으면 JOIN 없이 단일 테이블에서 조회
-    - 문자열 검색은 LIKE '%값%' 사용 (예: model_name LIKE '%i7%')
+    - 문자열 검색은 LIKE '%값%' 사용. 단, status 컬럼 제외
+    - status 컬럼은 반드시 = 연산자와 영어 값만 사용
+    - 허용값: 'Normal'(정상), 'Warning'(경고), 'Critical'(위험)
+    - 잘못된 예: WHERE status LIKE '%위험%' → 절대 금지
+    - 올바른 예: WHERE status = 'Critical'
     - 단, vehicle_id처럼 ID 컬럼은 = 사용
     - 한글 문자열 비교 시 반드시 N prefix 사용 (예: WHERE region = N'서울', alert_type LIKE N'%Thermal Stress%')
     - 시간 조회는 timestamp 또는 alert_time 컬럼 사용

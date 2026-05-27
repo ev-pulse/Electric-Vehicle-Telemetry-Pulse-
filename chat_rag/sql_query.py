@@ -44,14 +44,13 @@ def execute_query(sql: str) -> list[dict]:
 
 
 _TABLE_DESCRIPTIONS = {
-    "region_summary":   "지역 정보 관리",
-    "vehicle_info":     "차량 기본 정보",
-    "VehicleModel":     "차량 모델 정보",
-    "vehicle_status":   "차량 현재 상태 (실시간 관제용)",
-    "battery_telemetry":"시간대별 배터리 센서 및 BSI 데이터",
-    "bsi_feature_log":  "BSI 계산 입력 피처 로그",
-    "alert_log":        "실시간 이벤트 및 알림 로그",
-    "BSI_Threshold":    "BSI 상태 기준값 관리",
+    "Battery_Telemetry":        "EV 차량 배터리 센서 원본 스트리밍 로그. 전압, 전류, 온도, 외기온도, GPS 좌표 실시간 수신 저장",
+    "BSI_Feature_Log":          "BSI 산출을 위한 파생 피처 로그. 전류 변화량(delta_i), 전압 변화량(delta_v), 줄 발열 스트레스 저장",
+    "Vehicle_Current_Status":   "관제 화면 동기화용 차량별 최신 상태. Azure ML 결과 BSI 수치, 위험 등급, 현재 위치, BSI 기여 피처를 차량 1대당 1행 유지",
+    "Alert_Log":                "실시간 관제 이벤트 및 알림 내역 로그. WARNING/CRITICAL 감지 시 알림 유형, 위험 등급, 메시지, Slack 전송 여부 누적 저장",
+    "Region":                   "서울 행정구역 마스터. 구/군/시도 단위 행정구역 코드, 이름, 계층 구조, 지도 시각화용 중심 좌표 저장",
+    "Vehicle":                  "차량 마스터. VIN 기반 차량 고유 ID, 모델 정보, 기본 등록 행정구역, 차량 번호 저장",
+    "VehicleModel":             "차량 모델 마스터. 모델명, 제조사 정보 저장",
 }
 
 
