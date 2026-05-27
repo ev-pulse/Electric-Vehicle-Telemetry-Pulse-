@@ -53,6 +53,7 @@ param components_evmodelingml8998220664_name string = 'evmodelingml8998220664'
 param storageAccounts_evmodelingml3270747925_name string = 'evmodelingml3270747925'
 param workspaces_ev_modeling_ML_name string = 'ev-modeling-ML'
 param workspaces_evmodelingml1303723571_name string = 'evmodelingml1303723571'
+param registries_evmodelingml_name string = 'evmodelingmlcr'
 param smartdetectoralertrules_failure_anomalies_evmodelingml8998220664_name string = 'failure anomalies - evmodelingml8998220664'
 param actiongroups_application_insights_smart_detection_externalid string = '/subscriptions/${subscriptionId}/resourceGroups/a000-aml-rg/providers/microsoft.insights/actiongroups/application insights smart detection'
 
@@ -1509,6 +1510,18 @@ resource sites_ev_pulse_chat_name_resource 'Microsoft.Web/sites@2024-11-01' = {
   ]
 }
 
+resource registries_evmodelingml_name_resource 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
+  name: registries_evmodelingml_name
+  location: 'koreacentral'
+  sku: {
+    name: 'Basic'
+  }
+  properties: {
+    adminUserEnabled: true
+    publicNetworkAccess: 'Enabled'
+  }
+}
+
 resource workspaces_ev_modeling_ML_name_resource 'Microsoft.MachineLearningServices/workspaces@2025-12-01' = {
   name: workspaces_ev_modeling_ML_name
   location: 'koreacentral'
@@ -1525,6 +1538,7 @@ resource workspaces_ev_modeling_ML_name_resource 'Microsoft.MachineLearningServi
     storageAccount: storageAccounts_evmodelingml3270747925_name_resource.id
     keyVault: vaults_evmodelingml9323514119_name_resource.id
     applicationInsights: components_evmodelingml8998220664_name_resource.id
+    containerRegistry: registries_evmodelingml_name_resource.id
     hbiWorkspace: false
     managedNetwork: {
       isolationMode: 'Disabled'
