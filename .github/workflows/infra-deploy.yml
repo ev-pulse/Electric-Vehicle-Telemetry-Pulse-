@@ -41,7 +41,7 @@ jobs:
               tenantId="${{ secrets.TENANT_ID }}" \
               keyVaultObjectId="${{ secrets.KV_OBJECT_ID }}" \
               subscriptionId="${{ secrets.SUBSCRIPTION_ID }}" \
-              sqlAdminPassword="${{ secrets.SQL_ADMIN_PASSWORD }}" \
+              sqlAdminPassword="${{ secrets.SQL_ADMIN_PASSWORD }}"
 
   # ── [Job 2] Production Deployment to Azure Cloud (Main Branch Push only) ──
   deploy:
@@ -68,7 +68,6 @@ jobs:
               keyVaultObjectId="${{ secrets.KV_OBJECT_ID }}" \
               subscriptionId="${{ secrets.SUBSCRIPTION_ID }}" \
               sqlAdminPassword="${{ secrets.SQL_ADMIN_PASSWORD }}" \
-              mlModelUriPurple2="${{ secrets.ML_MODEL_URI_PURPLE2 }}" \
             --name "deploy-${{ github.sha }}"
 
       - name: Generate Deployment Summary
