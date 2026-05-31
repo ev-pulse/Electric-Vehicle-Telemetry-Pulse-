@@ -42,7 +42,6 @@ jobs:
               keyVaultObjectId="${{ secrets.KV_OBJECT_ID }}" \
               subscriptionId="${{ secrets.SUBSCRIPTION_ID }}" \
               sqlAdminPassword="${{ secrets.SQL_ADMIN_PASSWORD }}" \
-              mlModelUriPurple2="${{ secrets.ML_MODEL_URI_PURPLE2 }}"
 
   # ── [Job 2] Production Deployment to Azure Cloud (Main Branch Push only) ──
   deploy:

@@ -70,9 +70,6 @@ param connections_teams_name string = 'teams'
 param registries_dcb3bab8_name string = 'dcb3bab86b8249768958c307ec831b05'
 param onlineEndpoints_ev_anomaly_6403dedf_name string = 'ev-anomaly-endpoint-6403dedf'
 
-@description('최종 모델 ARM 리소스 ID — AML Studio › Models › ev-lgbm-inference-artifact › v8 › Copy asset ID')
-// 형식: /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.MachineLearningServices/workspaces/{ws}/models/{name}/versions/{ver}
-param mlModelUriPurple2 string
 
 resource accounts_evpulse_azoai_name_resource 'Microsoft.CognitiveServices/accounts@2025-12-01' = {
   name: accounts_evpulse_azoai_name
@@ -1755,7 +1752,9 @@ resource smartdetectoralertrules_evpulse_report_function_name_resource 'microsof
     state: 'Enabled'
     severity: 'Sev3'
     frequency: 'PT1M'
-    detectorId: 'FailureAnomaliesDetector'
+    detector: {
+      id: 'FailureAnomaliesDetector'
+    }
     scope: [
       components_evpulse_report_function_name_resource.id
     ]
@@ -1854,39 +1853,7 @@ resource onlineEndpoints_ev_anomaly_6403dedf_name_resource 'Microsoft.MachineLea
 }
 
 // ML Online Deployment: purple2
-// [주의] mlModelUriPurple2 파라미터를 parameters.json에 입력 필요
-resource onlineDeployments_purple2_name_resource 'Microsoft.MachineLearningServices/workspaces/onlineEndpoints/deployments@2025-12-01' = {
-  parent: onlineEndpoints_ev_anomaly_6403dedf_name_resource
-  name: 'purple2'
-  location: 'koreacentral'
-  sku: {
-    name: 'Default'
-    capacity: 1
-  }
-  properties: {
-    endpointComputeType: 'Managed'
-    instanceType: 'Standard_DS2_v2'
-    model: mlModelUriPurple2
-    scaleSettings: {
-      scaleType: 'Default'
-    }
-    requestSettings: {
-      requestTimeout: 'PT90S'
-      maxConcurrentRequestsPerInstance: 1
-    }
-    livenessProbe: {
-      initialDelay: 'PT10S'
-      period: 'PT10S'
-      timeout: 'PT2S'
-      successThreshold: 1
-      failureThreshold: 30
-    }
-    readinessProbe: {
-      initialDelay: 'PT10S'
-      period: 'PT10S'
-      timeout: 'PT2S'
-      successThreshold: 1
-      failureThreshold: 30
-    }
-  }
-}
+// [설계 결정] deployment 리소스는 Bicep에서 관리하지 않음
+// → 모델 버전·환경·compute 설정이 복잡하여 AML Studio 또는 CLI로 별도 관리
+// → az ml online-deployment create --file purple2-deployment.yml
+//    (AML Studio에서 이미 배포 완료된 상태)
