@@ -36,7 +36,7 @@
       "value": "YOUR_SQL_ADMIN_PASSWORD"
     },
     "mlModelUriPurple2": {
-      "value": "azureml:ev-lgbm-inference-artifact:8"
+      "value": "/subscriptions/27db5ec6-d206-4028-b5e1-6004dca5eeef/resourceGroups/4dt_team_1/providers/Microsoft.MachineLearningServices/workspaces/ev-modeling-ML/models/ev-lgbm-inference-artifact/versions/8"
     }
   }
 }

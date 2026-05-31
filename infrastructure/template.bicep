@@ -70,7 +70,8 @@ param connections_teams_name string = 'teams'
 param registries_dcb3bab8_name string = 'dcb3bab86b8249768958c307ec831b05'
 param onlineEndpoints_ev_anomaly_6403dedf_name string = 'ev-anomaly-endpoint-6403dedf'
 
-@description('최종 모델 URI — ev-lgbm-inference-artifact:8 (purple2 배포)')
+@description('최종 모델 ARM 리소스 ID — AML Studio › Models › ev-lgbm-inference-artifact › v8 › Copy asset ID')
+// 형식: /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.MachineLearningServices/workspaces/{ws}/models/{name}/versions/{ver}
 param mlModelUriPurple2 string
 
 resource accounts_evpulse_azoai_name_resource 'Microsoft.CognitiveServices/accounts@2025-12-01' = {
@@ -1664,15 +1665,15 @@ resource storageAccounts_evpulsestoragedev_name_resource 'Microsoft.Storage/stor
   }
 }
 
-// ── App Service Plan: ASP-4dtteam1-9d0a (evpulse-report-function용 Consumption) ──
+// ── App Service Plan: ASP-4dtteam1-9d0a (evpulse-report-function용 FlexConsumption) ──
 resource serverfarms_ASP_4dtteam1_9d0a_name_resource 'Microsoft.Web/serverfarms@2024-11-01' = {
   name: serverfarms_ASP_4dtteam1_9d0a_name
   location: 'Korea Central'
   sku: {
-    name: 'Y1'
-    tier: 'Dynamic'
-    size: 'Y1'
-    family: 'Y'
+    name: 'FC1'
+    tier: 'FlexConsumption'
+    size: 'FC1'
+    family: 'FC'
     capacity: 0
   }
   kind: 'functionapp'
@@ -1687,6 +1688,7 @@ resource serverfarms_ASP_4dtteam1_9d0a_name_resource 'Microsoft.Web/serverfarms@
     targetWorkerCount: 0
     targetWorkerSizeId: 0
     zoneRedundant: false
+    asyncScalingEnabled: false
   }
 }
 
@@ -1744,6 +1746,7 @@ resource sites_evpulse_report_function_name_resource 'Microsoft.Web/sites@2024-1
 }
 
 // ── Smart Detector Alert Rule: Failure Anomalies - evpulse-report-function ──
+// [주의] actionGroups 제거 — SP가 a000-aml-rg의 action group 읽기 권한 없음
 resource smartdetectoralertrules_evpulse_report_function_name_resource 'microsoft.alertsmanagement/smartDetectorAlertRules@2021-04-01' = {
   name: smartdetectoralertrules_failure_anomalies_evpulse_report_function_name
   location: 'global'
@@ -1757,9 +1760,7 @@ resource smartdetectoralertrules_evpulse_report_function_name_resource 'microsof
       components_evpulse_report_function_name_resource.id
     ]
     actionGroups: {
-      groupIds: [
-        actiongroups_application_insights_smart_detection_externalid
-      ]
+      groupIds: []
     }
   }
 }
