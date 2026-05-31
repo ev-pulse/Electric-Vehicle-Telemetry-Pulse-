@@ -691,23 +691,8 @@ resource servers_sqlserver_4dt_team1_name_AllowAllWindowsAzureIps 'Microsoft.Sql
   }
 }
 
-resource servers_sqlserver_4dt_team1_name_ClientIp_2026_5_19_13_51_41 'Microsoft.Sql/servers/firewallRules@2025-02-01-preview' = {
-  parent: servers_sqlserver_4dt_team1_name_resource
-  name: 'ClientIp-2026-5-19_13-51-41'
-  properties: {
-    startIpAddress: '175.192.165.144'
-    endIpAddress: '175.192.165.144'
-  }
-}
-
-resource servers_sqlserver_4dt_team1_name_QueryEditorClientIPAddress_1779175496965 'Microsoft.Sql/servers/firewallRules@2025-02-01-preview' = {
-  parent: servers_sqlserver_4dt_team1_name_resource
-  name: 'QueryEditorClientIPAddress_1779175496965'
-  properties: {
-    startIpAddress: '160.238.37.47'
-    endIpAddress: '160.238.37.47'
-  }
-}
+// 개인 IP 방화벽 규칙 제거 — 필요 시 Azure Portal에서 직접 추가:
+// SQL Server → 네트워킹 → 클라이언트 IP 추가
 
 resource Microsoft_Sql_servers_securityAlertPolicies_servers_sqlserver_4dt_team1_name_Default 'Microsoft.Sql/servers/securityAlertPolicies@2025-02-01-preview' = {
   parent: servers_sqlserver_4dt_team1_name_resource
@@ -1518,7 +1503,7 @@ resource sites_ev_pulse_chat_name_resource 'Microsoft.Web/sites@2024-11-01' = {
     clientCertMode: 'Required'
     hostNamesDisabled: false
     ipMode: 'IPv4'
-    customDomainVerificationId: '520102906446FA8AD73B8CFA97C3FF8F5911B86B3D031F586F4B1F9C7A1868D5'
+    // customDomainVerificationId — Azure 배포 시 자동 할당, 코드에 포함하지 않음
     containerSize: 1536
     dailyMemoryTimeQuota: 0
     httpsOnly: true
