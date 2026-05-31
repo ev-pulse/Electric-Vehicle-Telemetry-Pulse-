@@ -63,7 +63,7 @@
   엔드포인트 : ev-anomaly-endpoint-6403dedf
   배포명     : purple2
   모델       : ev-lgbm-inference-artifact  v8
-  관리 방법  : AML Studio / CLI (Bicep 외부 관리)
+  재배포     : infrastructure/ml-deployment-purple2.yml 참고
 ```
 
 ---
@@ -259,6 +259,32 @@ Azure Portal Export 원본 대비 변경된 보안 처리:
 | `sqlAdminPassword` | 미선언 | `@secure() @minLength(8) param sqlAdminPassword` |
 | 연결 문자열 | 하드코딩 | GitHub Secrets → 런타임 주입 |
 | Log Analytics 기본 리소스 | 808개 (Azure 한도 초과) | 103개 (자동 생성 항목 제거) |
+
+---
+
+## 🤖 ML 배포 재현 (리소스 그룹 삭제 후 복구 시)
+
+> ML Online Deployment는 ARM/Bicep API 제약으로 Bicep 외부에서 관리합니다.  
+> 재현에 필요한 모든 설정은 `ml-deployment-purple2.yml`에 보존되어 있습니다.
+
+```bash
+# Step 1 — ML 엔드포인트 생성 (template.bicep 배포 후 자동 생성됨)
+# 이미 생성되어 있다면 생략
+
+# Step 2 — purple2 배포 재현
+az ml online-deployment create \
+  --file infrastructure/ml-deployment-purple2.yml \
+  --workspace-name ev-modeling-ML \
+  --resource-group 4dt_team_1 \
+  --all-traffic
+```
+
+| 항목 | 값 |
+|------|----|
+| 엔드포인트 | `ev-anomaly-endpoint-6403dedf` |
+| 배포명 | `purple2` |
+| 모델 | `ev-lgbm-inference-artifact:8` |
+| 인스턴스 | `Standard_DS2_v2` × 1 |
 
 ---
 
