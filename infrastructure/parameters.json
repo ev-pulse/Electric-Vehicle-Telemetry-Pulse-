@@ -31,6 +31,12 @@
     },
     "vulnerabilityAssessments_Default_storageContainerPath": {
       "value": "YOUR_STORAGE_CONTAINER_PATH"
+    },
+    "sqlAdminPassword": {
+      "value": "YOUR_SQL_ADMIN_PASSWORD"
+    },
+    "mlModelUriPurple2": {
+      "value": "azureml:ev-lgbm-inference-artifact:8"
     }
   }
 }

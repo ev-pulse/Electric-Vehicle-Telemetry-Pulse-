@@ -12,7 +12,14 @@
 # ─────────────────────────────────────────────
 
 # ── Azure IoT Hub 연결 문자열 ──────────────────
-IOT_HUB_CONNECTION_STRING = "HostName=<YOUR_IOT_HUB>.azure-devices.net;DeviceId=<DEVICE_ID>;SharedAccessKey=<KEY>"
+# 실제 값은 Python_Simulator/.env 파일에 저장 (gitignore 처리됨)
+# 로컬 실행 전 .env 파일에 아래 형식으로 입력:
+#   IOT_HUB_CONNECTION_STRING=HostName=...;DeviceId=...;SharedAccessKey=...
+import os
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'))
+IOT_HUB_CONNECTION_STRING = os.environ.get('IOT_HUB_CONNECTION_STRING', '')
 
 # ── 전송 설정 ──────────────────────────────────
 SEND_INTERVAL_SEC  = 1.0     # IoT Hub 전송 주기 (초)
@@ -29,8 +36,8 @@ ANOMALY_VEHICLE_VINS = ["VIN-027", "VIN-022", "VIN-064", "VIN-024", "VIN-060"]
 
 # ── 서울 위치 범위 ─────────────────────────────
 LOCATION_NORMAL = {
-    "lat_min": 37.45, "lat_max": 37.65,
-    "lon_min": 126.85, "lon_max": 127.15,
+    "lat_min": 37.47, "lat_max": 37.62,
+    "lon_min": 126.88, "lon_max": 127.12,
 }
 LOCATION_ANOMALY = {
     "lat_min": 37.490, "lat_max": 37.510,

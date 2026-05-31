@@ -1,21 +1,41 @@
+# ── 민감 파라미터 파일 (실제 비밀값 포함 — 절대 커밋 금지) ──────────
 parameters.local.json
-
-# Prevent committing local parameters with sensitive data
-infrastructure/parameters_local.json
 infrastructure/parameters.local.json
+infrastructure/parameters_local.json
 *.local.json
 
-echo ".DS_Store" >> .gitignore
-echo "**/.DS_Store" >> .gitignore
-
-.DS_Store
+# ── 환경변수 / 자격증명 ────────────────────────────────────────────
 .env
+.env.*
+*.env
+
+# Azure 자격증명
+azure_credentials.json
+azure-credentials.json
+*credentials*.json
+
+# ── Python ────────────────────────────────────────────────────────
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+
+# ── macOS ─────────────────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+
+# ── Azure / 로컬 개발 ─────────────────────────────────────────────
+__azurite_db_*.json
+local.settings.json
+.azure/
+
+# ── 데이터 파일 (용량 크고 민감할 수 있음) ───────────────────────
 *.csv
 *.jsonl
-.DS_Store
-.env
-__pycache__/
-*.pyc
-__azurite_db_*.json
+
+# ── 인증서 / 키 ───────────────────────────────────────────────────
+*.pem
+*.key
+*.pfx
+*.p12
