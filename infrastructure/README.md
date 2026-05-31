@@ -262,16 +262,52 @@ Azure Portal Export 원본 대비 변경된 보안 처리:
 
 ---
 
-## 🤖 ML 배포 재현 (리소스 그룹 삭제 후 복구 시)
+## 🗂️ 재현 파일 구조
 
-> ML Online Deployment는 ARM/Bicep API 제약으로 Bicep 외부에서 관리합니다.  
-> 재현에 필요한 모든 설정은 `ml-deployment-purple2.yml`에 보존되어 있습니다.
+리소스 그룹이 삭제되더라도 이 레포 하나로 전체 환경을 복구할 수 있습니다.
+
+```
+infrastructure/
+├── template.bicep              ← 전체 Azure 인프라 재현 (ML Workspace, IoT Hub 등)
+├── ml-deployment-purple2.yml   ← purple2 ML 배포 재현 (모델 버전·compute 설정 포함)
+├── parameters.json             ← 파라미터 템플릿 (YOUR_* 값을 실제 값으로 교체)
+└── README.md                   ← 재배포 명령어 및 전체 아키텍처 문서
+```
+
+---
+
+## 🔁 전체 환경 재구축 순서 (리소스 그룹 삭제 후)
+
+### Step 1 — 리소스 그룹 생성
 
 ```bash
-# Step 1 — ML 엔드포인트 생성 (template.bicep 배포 후 자동 생성됨)
-# 이미 생성되어 있다면 생략
+az group create \
+  --name 4dt_team_1 \
+  --location koreacentral
+```
 
-# Step 2 — purple2 배포 재현
+### Step 2 — 전체 Azure 인프라 배포 (template.bicep)
+
+```bash
+az deployment group create \
+  --resource-group 4dt_team_1 \
+  --template-file infrastructure/template.bicep \
+  --parameters @infrastructure/parameters.json \
+    tenantId="YOUR_TENANT_ID" \
+    keyVaultObjectId="YOUR_OBJECT_ID" \
+    subscriptionId="YOUR_SUBSCRIPTION_ID" \
+    sqlAdminPassword="YOUR_SQL_PASSWORD"
+```
+
+> IoT Hub, SQL, Stream Analytics, ML Workspace, Function App, Azure Bot 등 전체 리소스가 이 한 번의 명령으로 생성됩니다.
+
+### Step 3 — ML 프로덕션 모델 배포 (purple2)
+
+```bash
+# ML extension 설치 (최초 1회)
+az extension add --name ml
+
+# purple2 배포 재현
 az ml online-deployment create \
   --file infrastructure/ml-deployment-purple2.yml \
   --workspace-name ev-modeling-ML \
@@ -284,7 +320,11 @@ az ml online-deployment create \
 | 엔드포인트 | `ev-anomaly-endpoint-6403dedf` |
 | 배포명 | `purple2` |
 | 모델 | `ev-lgbm-inference-artifact:8` |
+| 알고리즘 | LightGBM (BSI 기반 이상 탐지) |
 | 인스턴스 | `Standard_DS2_v2` × 1 |
+
+> ML Online Deployment는 ARM/Bicep API 제약으로 YAML로 별도 관리합니다.  
+> `ml-deployment-purple2.yml`에 모든 설정이 보존되어 있습니다.
 
 ---
 
