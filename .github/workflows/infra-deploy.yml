@@ -1,0 +1,81 @@
+name: EV-Pulse Infrastructure Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infrastructure/**'        # Triggered only when files under infrastructure/ change
+  pull_request:
+    branches: [main]
+    paths:
+      - 'infrastructure/**'
+  workflow_dispatch:               # Enables manual trigger button on the GitHub Web UI
+
+env:
+  RESOURCE_GROUP: ${{ secrets.AZURE_RG }}          # Retrieves '4dt_team_1' from secrets
+  TEMPLATE_FILE: infrastructure/template.bicep     # Path to the main Bicep template
+
+jobs:
+  # ── [Job 1] Syntax Validation & Impact Simulation (PR Stage) ──
+  validate:
+    name: Bicep Lint & What-If Simulation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log In to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}  # Service Principal credentials JSON
+
+      - name: Run Bicep Lint (Syntax Check)
+        run: az bicep build --file ${{ env.TEMPLATE_FILE }}
+
+      - name: Execute Azure What-If (Dry-Run Prediction)
+        run: |
+          az deployment group what-if \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --template-file ${{ env.TEMPLATE_FILE }} \
+            --parameters \
+              tenantId="${{ secrets.TENANT_ID }}" \
+              keyVaultObjectId="${{ secrets.KV_OBJECT_ID }}" \
+              subscriptionId="${{ secrets.SUBSCRIPTION_ID }}" \
+              sqlAdminPassword="${{ secrets.SQL_ADMIN_PASSWORD }}"
+
+  # ── [Job 2] Production Deployment to Azure Cloud (Main Branch Push only) ──
+  deploy:
+    name: Production Deployment
+    runs-on: ubuntu-latest
+    needs: validate                # Ensures the deployment runs only after validation passes perfectly
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log In to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Infrastructure via Bicep
+        run: |
+          az deployment group create \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --template-file ${{ env.TEMPLATE_FILE }} \
+            --parameters \
+              tenantId="${{ secrets.TENANT_ID }}" \
+              keyVaultObjectId="${{ secrets.KV_OBJECT_ID }}" \
+              subscriptionId="${{ secrets.SUBSCRIPTION_ID }}" \
+              sqlAdminPassword="${{ secrets.SQL_ADMIN_PASSWORD }}" \
+            --name "deploy-${{ github.sha }}"
+
+      - name: Generate Deployment Summary
+        run: |
+          echo "## 🎉 Infrastructure Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "The cloud infrastructure has been securely updated and provisioned via GitOps." >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Run Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit SHA**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target Resource Group**: \`${{ env.RESOURCE_GROUP }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Template File Used**: \`${{ env.TEMPLATE_FILE }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflow Triggered By**: \`${{ github.actor }}\`" >> $GITHUB_STEP_SUMMARY
