@@ -57,7 +57,8 @@ Z_Thermal_Stress =
 ## 아키텍처
 
 ![아키텍처](docs/architecture.png)
-[시연 영상 보기](docs/evpulse_시연영상.mp4) \n
+[시연 영상 보기](docs/evpulse_시연영상.mp4) 
+
 [발표 자료 보기](docs/EV-Pulse.pptx.pdf)
 
 **모델 레이어**
