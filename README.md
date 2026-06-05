@@ -1,164 +1,188 @@
-# Text to SQL Chatbot — 전기차 배터리 텔레메트리 질의 응답 시스템
+# ⚡ EV-Pulse — Electric Vehicle Telemetry Pulse
 
-Azure Functions 기반의 Text-to-SQL 챗봇입니다.  
-자연어 질문을 SQL로 변환해 Azure SQL Database를 조회하고, Azure OpenAI GPT가 결과를 분석해 답변합니다.  
-Slack 및 Microsoft Teams 채널에서 멘션으로 사용할 수 있습니다.
+전기차 배터리 텔레메트리를 실시간으로 수집·분석해 **이상 전조를 조기에 탐지**하고,
+자체 지표 **BSI(Battery Stress Index)** 로 차량 상태를 정량화하는 Azure 기반 모니터링 시스템.
+
+> **배터리는 갑자기 죽지 않는다.** 열폭주·셀 열화에는 수십 분~수 시간의 전조 신호가 있고,
+> 그 구간을 잡아 "수리 가능 여부"가 아니라 **"언제 멈추느냐"** 를 관리하는 것이 EV-Pulse의 목표이다.
+
+---
+
+## 프로젝트 목표
+
+1. 배터리 열화 메커니즘을 반영한 **EV 상태 실시간 모니터링** 시스템 구축
+2. **자체 기준(BSI)** 을 정의하고, 그 기준으로 항목별 이상 여부를 판단
+3. 장기적으로 차량 생애주기 데이터를 축적해 **차세대 배터리 개선**에 활용
+
+### 왜 필요한가 (요약)
+
+전기차 보급이 빠르게 늘면서 배터리 안전성·유지보수 비용·중고 잔존가치·OTA 오류·규제 대응 문제가 동시에 커지고 있다. 사후(정비·리콜) 대응은 비용·시간 부담이 크므로, 차량 데이터를 실시간 분석해 **사전 예방형 품질 관리**로 전환할 필요가 있다. 배터리는 EV 원가의 30~40%를 차지하는 고가 부품이고, EU는 2027년부터 디지털 배터리 여권을 요구하는 등 이력 관리가 규제 대응의 핵심이 되고 있다.
+
+---
+
+## 핵심 개념: BSI (Battery Stress Index)
+
+배터리 상태에 영향을 주는 주요 stress feature들의 이상도(A·)를 가중 합산해 산출하는 종합 이상 지표.
+가중치는 **NASA Battery Dataset** 분석을 근거로 설정한다.
+
+```
+BSI =
+  0.4830 × |Z_Delta_I|
++ 0.2218 × |Z_Delta_V|
++ 0.1027 × |Z_Thermal_Stress|
++ 0.0992 × |Z_Battery_Current|
++ 0.0933 × |Z_Battery_Voltage|
+
+Z_Thermal_Stress =
+  0.8 × Z_Joule_Heating_Stress
++ 0.2 × Z_Thermal_Temperature_70min
+```
+
+| 피처 | 의미 | 가중치 |
+|------|------|--------|
+| AΔI | 전류 변화량 이상도 | 0.3140 |
+| AΔP | 전력 변화량 이상도 | 0.2933 |
+| AΔV | 전압 변화량 이상도 | 0.1442 |
+| AJHS | Joule Heating 기반 thermal stress 이상도 | 0.0668 |
+| AI | 배터리 전류 이상도 | 0.0645 |
+| AV | 배터리 전압 이상도 | 0.0607 |
+| AP | 배터리 전력 이상도 | 0.0565 |
+
+> **BSI 값은 Azure ML(LightGBM)이 산출한다.** 들어온 텔레메트리를 모델에 추론시키고 그 출력값을 해당 차량의 BSI로 기록하며, 이를 기준으로 정상/위험을 판별한다. 시뮬레이터·Stream Analytics는 BSI를 계산하지 않는다.
+
+설명 가능성을 위해 단순 점수만 보여주지 않고 "셀 전압 편차 증가", "급속충전 후 냉각 지연" 같은 **이상 원인(피처)** 을 함께 제시하는 것을 지향한다.
 
 ---
 
 ## 아키텍처
 
+![아키텍처](docs/architecture.png)
+
+**모델 레이어**
+
+- NASA Battery Dataset → BSI 가중치·임계값 근거
+- BMW i3 Dataset → 실차 기반 μ/σ 파라미터
+- 프로덕션 모델 `ev-lgbm-inference-artifact:8` / 엔드포인트 `ev-anomaly-endpoint-6403dedf` / 배포 `purple2` / `Standard_DS2_v2`
+
+---
+
+## 저장소 구조
+
 ```
-사용자 질문 (Slack / Teams)
-        │
-        ▼
-  Azure Function (HTTP Trigger)
-        │
-        ├─ Azure OpenAI GPT  →  자연어 → SQL 변환
-        │
-        ├─ Azure SQL Database  →  쿼리 실행
-        │
-        └─ Azure OpenAI GPT  →  SQL 결과 → 자연어 답변
+.
+├── README.md
+├── asaproj.json               # Stream Analytics 프로젝트 정의
+├── .gitignore
+│
+├── chatbot/                   # Text-to-SQL 챗봇 (Azure Function)
+│   ├── __init__.py            #   Slack / Teams 이벤트 라우팅
+│   ├── gpt_client.py          #   자연어 → SQL 변환 및 답변 생성
+│   ├── sql_query.py           #   SQL Server 연결 및 쿼리 실행
+│   ├── function.json
+│   └── README.md
+│
+├── Python_Simulator/          # 차량 텔레메트리 재생 시뮬레이터
+│   ├── simulator.py           #   VIN 매핑·합성차량 증강·파생변수 계산·IoT 전송
+│   ├── config.py              #   IoT Hub·임계값·증강 파라미터
+│   ├── requirements.txt
+│   └── README.md
+│
+├── infrastructure/            # Infrastructure as Code (Bicep)
+│   ├── main.bicep             #   핵심 5개 리소스 직접 설계
+│   ├── template.bicep         #   Portal Export 기반 전체 스냅샷
+│   ├── main.json              #   main.bicep 컴파일(ARM)
+│   ├── ml-deployment-purple2.yml
+│   ├── parameters.json        #   파라미터 템플릿(YOUR_* 플레이스홀더)
+│   └── README.md
+│
+└── .github/workflows/
+    └── infra-deploy.yml       # CI/CD (Bicep Lint → What-If → Deploy)
 ```
 
 ---
 
-## 주요 파일
+## 핵심 구성 요소
 
-| 파일 | 설명 |
-|------|------|
-| `chatbot/__init__.py` | Azure Function 진입점. Slack / Teams 이벤트 라우팅 |
-| `chatbot/gpt_client.py` | Azure OpenAI 클라이언트. SQL 변환 및 답변 생성 |
-| `chatbot/sql_query.py` | SQL Server 연결, 스키마 조회, 쿼리 실행 |
-| `chatbot/function.json` | Azure Function HTTP 트리거 바인딩 설정 |
+### 1. Python Simulator
 
----
+전처리된 BMW CSV(약 200,000행·실차 70대)를 실시간 차량 데이터처럼 IoT Hub로 재생한다.
 
-## 데이터베이스 스키마
-
-| 테이블 | 설명 |
-|--------|------|
-| `Region` | 서울 행정구역 마스터. 구/군/시도 단위 코드, 이름, 계층 구조, 지도 좌표 |
-| `Vehicle` | 차량 마스터. VIN 기반 차량 ID, 모델 정보, 등록 행정구역, 차량 번호 |
-| `VehicleModel` | 차량 모델 마스터. 모델명, 제조사 정보 |
-| `Vehicle_Current_Status` | 차량별 최신 상태. BSI 수치, 위험 등급, 현재 위치 (차량 1대당 1행) |
-| `Battery_Telemetry` | 배터리 센서 실시간 스트리밍 로그. 전압, 전류, 온도, GPS 좌표 |
-| `BSI_Feature_Log` | BSI 산출용 파생 피처 로그. delta_i, delta_v, thermal_stress |
-| `Alert_Log` | 실시간 이벤트 및 알림 로그. WARNING/CRITICAL 감지 내역, Slack 전송 여부 |
-
----
-
-## 자치구 코드 매핑
-
-자치구 이름으로 질문하면 행정구역 코드로 자동 변환됩니다.
-
-| 자치구 | 코드 | 자치구 | 코드 | 자치구 | 코드 |
-|--------|------|--------|------|--------|------|
-| 종로구 | 010 | 동대문구 | 060 | 노원구 | 110 |
-| 중구 | 020 | 중랑구 | 070 | 은평구 | 120 |
-| 용산구 | 030 | 성북구 | 080 | 서대문구 | 130 |
-| 성동구 | 040 | 강북구 | 090 | 마포구 | 140 |
-| 광진구 | 050 | 도봉구 | 100 | 양천구 | 150 |
-| 강서구 | 160 | 영등포구 | 190 | 강남구 | 230 |
-| 구로구 | 170 | 동작구 | 200 | 송파구 | 240 |
-| 금천구 | 180 | 관악구 | 210 | 강동구 | 250 |
-|  |  | 서초구 | 220 |  |  |
-
-광역자치단체(시/도)로 질문하면 산하 모든 구/시/군 데이터를 합산하고, "전국"으로 질문하면 17개 광역자치단체 전체를 합산합니다.
-
----
-
-## 환경 변수
-
-`local.settings.json` (로컬) 또는 Azure Function 앱 설정에 아래 값을 등록해야 합니다.
-
-### Azure OpenAI
-| 변수 | 설명 |
-|------|------|
-| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI 엔드포인트 URL |
-| `AZURE_OPENAI_KEY` | API 키 |
-| `AZURE_OPENAI_API_VERSION` | API 버전 (예: `2024-02-01`) |
-| `AZURE_OPENAI_DEPLOYMENT` | 배포 모델명 |
-
-### Azure SQL Database
-| 변수 | 설명 |
-|------|------|
-| `SQL_SERVER` | SQL Server 호스트명 |
-| `SQL_DATABASE` | 데이터베이스명 |
-| `SQL_USERNAME` | 사용자명 |
-| `SQL_PASSWORD` | 비밀번호 |
-| `DB_SCHEMA` | 스키마명 (예: `dbo`) |
-
-### Microsoft Teams Bot
-| 변수 | 설명 |
-|------|------|
-| `MICROSOFT_APP_ID` | Teams Bot 앱 ID |
-| `MICROSOFT_APP_PASSWORD` | Teams Bot 앱 비밀번호 |
-| `MICROSOFT_TENANT_ID` | Azure 테넌트 ID |
-
-### Slack Bot
-| 변수 | 설명 |
-|------|------|
-| `SLACK_BOT_TOKEN` | Slack Bot OAuth 토큰 |
-| `SLACK_SIGNING_SECRET` | Slack 서명 검증 시크릿 |
-
----
-
-## 로컬 실행
+- **차량 100대**: 실차 70대 + 가우시안 증강 15대(VIN-071~085) + 열화 시뮬레이션 15대(VIN-086~100)
+- 파생변수만 계산: `ΔI = I(t)−I(t−1)`, `ΔV = V(t)−V(t−1)`, `JHS = I² × T`
+- Z-score·BSI·상태 판별은 계산하지 않음 → Azure ML 담당
+- 이상 센서값 1% 확률 주입(파이프라인 테스트), 서울 25개 구 위경도 매핑
 
 ```bash
-# 의존성 설치
+cd Python_Simulator
 pip install -r requirements.txt
-
-# Azure Functions Core Tools로 실행
-func start
+python3 simulator.py --dry-run      # 콘솔 출력만
+python3 simulator.py                # IoT Hub 전송 (.env 필요)
 ```
+
+### 2. Infrastructure (Bicep)
+
+전체 Azure 환경을 코드로 재현. 두 Bicep을 의도적으로 분리:
+
+| 파일 | 용도 |
+|------|------|
+| `main.bicep` | 핵심 5개(IoT Hub·SQL·Stream Analytics·Storage·Logic Apps) 직접 설계 |
+| `template.bicep` | Portal Export 전체 스냅샷 — ML Workspace·OpenAI·Key Vault·Function App·Bot 포함, 민감값 제거 |
+
+**리전 고정**: 실시간 파이프라인 전체를 `koreacentral`로 고정(레이턴시·오배포 방지). Azure OpenAI만 gpt-4o-mini 가용성 때문에 `eastus`.
+
+### 3. 알림 (Logic Apps)
+
+SQL `[dbo].[ModelAlertTest]` 테이블을 **3분 간격** 폴링하다 이상/위험 감지 시 Slack으로 전송(Teams 커넥션도 정의됨). KST(UTC+9) 변환, BSI 수치·이상 피처·감지 시각 포함.
+
+### 4. Text-to-SQL 챗봇
+
+Function App(Python) + Azure OpenAI `gpt-4o-mini`(`evpulse-gpt`) 기반 Text-to-SQL. 자연어 질의를 SQL로 변환해 `evpulse` DB를 조회한다. 자세한 내용은 [chatbot/README.md](chatbot/README.md) 참고.
+
+### 5. CI/CD
+
+`infrastructure/**` 변경 시 트리거. PR → `validate`(Bicep Lint + what-if), main push → `deploy`. 인증은 Service Principal(`AZURE_CREDENTIALS`), 민감값은 GitHub Secrets 런타임 주입.
 
 ---
 
-## 사용 예시
+## 배포 / 실행
 
-**Slack:**
-```
-@봇이름 마포구 차량 중 BSI가 가장 낮은 차량은?
-@봇이름 오늘 오후에 발생한 Thermal Stress 알림 목록 보여줘
-@봇이름 서울 전체 Critical 상태 차량 수는?
+```bash
+az group create --name evpulse-rg --location koreacentral
+
+# 핵심 파이프라인
+az deployment group create \
+  --resource-group evpulse-rg \
+  --template-file infrastructure/main.bicep \
+  --parameters @infrastructure/parameters.json
+
+# ML 배포 재현
+az ml online-deployment create \
+  --file infrastructure/ml-deployment-purple2.yml \
+  --workspace-name ev-modeling-ML \
+  --resource-group evpulse-rg --all-traffic
 ```
 
-**Teams:**
-```
-i7 모델의 평균 배터리 온도는?
-강남구에서 Warning 이상 알림이 발생한 차량 목록 보여줘
-```
+비밀값·연결 문자열·자격증명은 코드에 포함하지 않으며(`@secure()` + GitHub Secrets), `.env`·`*.local.json`·`*.csv`·키/인증서는 `.gitignore` 처리한다.
 
 ---
 
-## SQL 변환 규칙 정확도 체크리스트
+## 비즈니스 가치 (이해관계자별)
 
-GPT SQL 변환 결과를 검증할 때 아래 규칙별로 확인합니다.
-
-| # | 규칙 | 테스트 질문 예시 | 확인 포인트 | 통과 기준 |
-|---|------|----------------|------------|----------|
-| 1 | SELECT만 허용 | "배터리 온도 데이터 삭제해줘" | 생성된 쿼리 타입 | SELECT 외 DML 미생성 |
-| 2 | 스키마 prefix | "차량 목록 보여줘" | 테이블명 앞 prefix | `dbo.Vehicle` 형식 사용 |
-| 3 | status 영문 값 | "위험 상태 차량은?" | WHERE status 절 | `status = 'Critical'` (한글·LIKE 금지) |
-| 4 | status LIKE 금지 | "경고 상태 차량 수는?" | WHERE status 절 | `LIKE '%경고%'` 미사용 |
-| 5 | 한글 N prefix | "서울 지역 차량은?" | WHERE 문자열 비교 | `N'서울'` 형식 사용 |
-| 6 | 자치구 코드 변환 | "마포구 차량 현황은?" | WHERE region_code 절 | `= '140'` 형식 사용 |
-| 7 | 광역 단위 집계 | "서울 전체 Critical 차량 수는?" | 집계 범위 | 서울 산하 25개 구 전체 합산 |
-| 8 | 전국 집계 | "전국 배터리 이상 건수는?" | 집계 범위 | 17개 광역자치단체 전체 합산 |
-| 9 | 오전/오후 시간 범위 | "오늘 오후 알림 목록 보여줘" | WHERE 시간 조건 | `12:00:00 ~ 23:59:59` |
-| 10 | 단일 테이블 조회 | "차량 ID 목록 보여줘" | 불필요한 JOIN 여부 | Vehicle 한 테이블만 사용 |
-| 11 | 존재하는 컬럼만 사용 | "차량 색상 알려줘" | 생성된 컬럼명 | 스키마 외 컬럼 미생성 |
-| 12 | 데이터 없을 때 응답 | 조건에 해당하는 데이터가 없는 질문 | GPT 최종 답변 | "해당 조건의 데이터가 없습니다" 출력, 빈 응답 미반환 |
+| 이해관계자 | Pain Point | EV-Pulse 가치 |
+|-----------|-----------|--------------|
+| 완성차 제조사(OEM) | 리콜 비용·품질 이슈, 실운행 데이터 부족 | Fleet 단위 열화 패턴 분석, 배치·연식·지역별 이상 탐지, OTA/BMS 개선 |
+| 배터리 제조사 | 셀 품질 편차·배치 추적 어려움 | 셀 단위 열화·전압 불균형 분석으로 차세대 셀 설계 지원 |
+| Fleet 운영사(렌터카·물류·택시) | 운행 중단 손실, 교체 비용 | 예방 정비, 위험 차량 우선 관리, 배차 전 제외로 운행 완료율 보장 |
+| 보험사 | EV 화재·사고 보험 비용 증가 | 위험 패턴 기반 사고 예측, 탑재 차량 보험료 할인(B2B) |
+| 중고차 시장/수출 | 배터리 상태 신뢰 부족 | 텔레메트리 이력 기반 배터리 건강도 인증 |
+| 개인 소유자 | 갑작스러운 이상·교체 비용 | 이상 전조 알림, 수명 관리, 유지비 절감 |
+| 공공/ESG | EV 안전, 폐배터리 증가 | 사고율 감소, 수명 연장으로 자원 효율·지속가능성 |
 
 ---
 
-## 처리 흐름
+## ⚠️ 참고: 정합성 / 미완성 항목
 
-1. Slack `app_mention` 또는 Teams `message` 이벤트 수신
-2. Slack 요청은 HMAC-SHA256 서명 검증 및 중복 이벤트 필터링
-3. Azure OpenAI가 DB 스키마를 참고해 자연어 질문을 SQL로 변환
-4. Azure SQL Server에서 쿼리 실행
-5. Azure OpenAI가 SQL 결과를 분석해 자연어 답변 생성
-6. Slack / Teams 채널에 답변 전송
+1. **BSI 가중치 정의 불일치** — 본 README는 기획 문서의 **7개 피처** 정의(AΔI 0.3140·AΔP 0.2933·AΔV 0.1442·AJHS 0.0668·AI 0.0645·AV 0.0607·AP 0.0565)를 정식으로 본다. 그러나 저장소 `simulator.py` 주석은 **3개 피처** 버전(ΔI 0.4830·ΔV 0.2218·JHS 0.1027)으로 적혀 있다. 모델 학습 코드/노트북을 함께 두고 어느 정의가 실제 배포 모델에 반영됐는지 코드 주석을 통일할 필요가 있다.
+2. **`infrastructure/README.md`의 구식 서술** — 일부 다이어그램이 Stream Analytics가 Z-score·상태 판정을 한다고 그렸으나, 실제로는 **Azure ML(LightGBM)** 이 BSI·상태를 산출한다. Stream Analytics는 컬럼 추출·이상 원인 기준·이벤트 정렬까지만 담당한다. 알림도 "Teams/30초"가 아니라 **Slack/3분 폴링**이다.
+3. **참조되지만 없는 파일** — `asaproj.json`의 `test.asaql`, `main.bicep`이 참조하는 `/sql/sa_query.sql`, 시뮬레이터 입력 CSV, 리포트 Function 소스 코드(인프라 정의만 존재).
+4. **리소스 그룹** — `evpulse-rg`를 사용한다. 원래 `4dt_team_1`은 프로젝트성 RG로 이미 삭제되었다.
