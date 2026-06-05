@@ -19,16 +19,25 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.py[cod]
 .Python
 
 # ── macOS ─────────────────────────────────────────────────────────
 .DS_Store
+.AppleDouble
+.LSOverride
 **/.DS_Store
 
 # ── Azure / 로컬 개발 ─────────────────────────────────────────────
-__azurite_db_*.json
 local.settings.json
+__azurite_db_*.json
+__blobstorage__/
+__queuestorage__/
 .azure/
+
+# ── 가상환경 ──────────────────────────────────────────────────────
+.venv/
+.python_packages/
 
 # ── 데이터 파일 (용량 크고 민감할 수 있음) ───────────────────────
 *.csv
