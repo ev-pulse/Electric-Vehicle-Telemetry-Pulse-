@@ -27,10 +27,10 @@ Slack 및 Microsoft Teams 채널에서 멘션으로 사용할 수 있습니다.
 
 | 파일 | 설명 |
 |------|------|
-| `chat_rag/__init__.py` | Azure Function 진입점. Slack / Teams 이벤트 라우팅 |
-| `chat_rag/gpt_client.py` | Azure OpenAI 클라이언트. SQL 변환 및 답변 생성 |
-| `chat_rag/sql_query.py` | SQL Server 연결, 스키마 조회, 쿼리 실행 |
-| `chat_rag/function.json` | Azure Function HTTP 트리거 바인딩 설정 |
+| `chatbot/__init__.py` | Azure Function 진입점. Slack / Teams 이벤트 라우팅 |
+| `chatbot/gpt_client.py` | Azure OpenAI 클라이언트. SQL 변환 및 답변 생성 |
+| `chatbot/sql_query.py` | SQL Server 연결, 스키마 조회, 쿼리 실행 |
+| `chatbot/function.json` | Azure Function HTTP 트리거 바인딩 설정 |
 
 ---
 
