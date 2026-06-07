@@ -35,6 +35,11 @@ __blobstorage__/
 __queuestorage__/
 .azure/
 
+# ── Azure ML Studio ─────────────────────────────────────────────
+outputs/
+*.pkl
+*.joblib
+
 # ── 가상환경 ──────────────────────────────────────────────────────
 .venv/
 .python_packages/
