@@ -1,0 +1,2 @@
+# azureml-core 버전 1.0.72 이상이 필요함
+# 버전 1.1.34 이상의 azureml-dataprep[pandas]가 필요합니다.
