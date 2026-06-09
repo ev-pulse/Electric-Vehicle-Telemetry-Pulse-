@@ -1,0 +1,29 @@
+# =================배포 환경====================
+#  EV-Pulse Azure ML Deployment · conda.yaml
+#
+#  역할
+#  ┌─ Azure ML Online Endpoint ─────────────────┐
+#  │  score.py 실행에 필요한 Python/ML 패키지 정의 │
+#  └────────────────────────────────────────────┘
+#
+#  주요 포함 패키지
+#  - azureml-inference-server-http : Azure ML 추론 서버
+#  - pandas / numpy                : 입력 데이터 처리 및 파생변수 계산
+#  - scikit-learn / lightgbm       : 모델 추론
+#  - joblib                        : 저장된 모델 로드
+#
+# =============================================
+name: ev-lgbm-inference-env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - azureml-inference-server-http 
+      - pandas==2.2.2
+      - numpy==1.23.5
+      - scikit-learn==1.5.1
+      - lightgbm==4.5.0
+      - joblib==1.4.2
+      - inference-schema[numpy-support] 
